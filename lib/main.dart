@@ -5,6 +5,8 @@ import 'package:webfeed/webfeed.dart';
 
 import 'components/ListItem.dart';
 
+import 'pages/AddFeed.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -63,16 +65,40 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        leading: PopupMenuButton<MenuOption>(
-          icon: Icon(Icons.menu),
-          onSelected: (MenuOption option) {
-            print(option.toString());
-          },
-          itemBuilder: (BuildContext context) {
-            return <PopupMenuEntry<MenuOption>>[
-              PopupMenuItem(child: Text("Add feed"), value: MenuOption.Add),
-            ];
-          },
+      ),
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Icon(
+                Icons.chrome_reader_mode_rounded,
+                color: Colors.white,
+                size: 72.0,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+            ),
+            ListTile(
+              title: Text('Home'),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => MyHomePage()));
+              },
+            ),
+            ListTile(
+              title: Text('Add feed'),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AddFeed()));
+              },
+            ),
+          ],
         ),
       ),
       body: Center(
