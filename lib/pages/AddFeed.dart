@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../main.dart';
 
 class AddFeed extends StatefulWidget {
@@ -8,6 +10,8 @@ class AddFeed extends StatefulWidget {
 }
 
 class _AddFeedState extends State<AddFeed> {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,11 +19,7 @@ class _AddFeedState extends State<AddFeed> {
         title: Text("Feed Scout - Add Feed"),
       ),
       drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the user can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
         child: ListView(
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
@@ -29,7 +29,7 @@ class _AddFeedState extends State<AddFeed> {
                 size: 72.0,
               ),
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.teal,
               ),
             ),
             ListTile(
@@ -49,7 +49,62 @@ class _AddFeedState extends State<AddFeed> {
           ],
         ),
       ),
-      body: Center(child: Text("Add Feed")),
+      body: Container(
+        padding: EdgeInsets.all(10),
+        child: Form(
+          child: Column(
+            key: _formKey,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter a name for your new feed',
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a name for your feed';
+                  }
+                  return value;
+                },
+              ),
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter the url of your new feed',
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter the url of your feed';
+                  }
+                  return value;
+                },
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Validate will return true if the form is valid, or false if
+                    // the form is invalid.
+                    if (_formKey.currentState.validate()) {
+                      print("validated");
+                      _saveFeed();
+                    }
+                  },
+                  child: Text('Safe feed'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
+}
+
+_saveFeed() async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'my_int_key';
+  final value = 42;
+  prefs.setInt(key, value);
+  print('saved $value');
 }

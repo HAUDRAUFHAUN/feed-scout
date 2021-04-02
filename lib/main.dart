@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webfeed/webfeed.dart';
 
 import 'components/ListItem.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Feed Scout',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
       ),
       home: MyHomePage(title: 'Feed Scout'),
     );
@@ -81,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 size: 72.0,
               ),
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.teal,
               ),
             ),
             ListTile(
