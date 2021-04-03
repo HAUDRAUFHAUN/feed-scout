@@ -104,7 +104,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: FutureBuilder(
-          initialData: ("Loading"),
           future: feedData,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -131,5 +130,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-enum MenuOption { Add }
