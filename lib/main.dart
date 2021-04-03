@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
@@ -102,20 +105,38 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      body: Center(
+      body: Container(
+        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 4),
         child: FutureBuilder(
           future: feedData,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return ListView(children: <Widget>[
-                for (var item in snapshot.data.items)
-                  ListItem(
-                      title: item.title,
-                      description: item.description,
-                      url: item.link)
-              ]);
+              return ListView(
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        constraints:
+                            BoxConstraints(minWidth: 100, maxWidth: 150),
+                        padding: EdgeInsets.all(10),
+                        child:
+                            Image(image: NetworkImage(snapshot.data.image.url)),
+                      ),
+                    ],
+                  ),
+                  for (var item in snapshot.data.items)
+                    ListItem(
+                        title: item.title,
+                        description: item.description,
+                        url: item.link)
+                ],
+              );
             } else if (snapshot.hasError) {
-              return Text("${snapshot.error}");
+              return Container(
+                padding: EdgeInsets.all(10),
+                child: Text("Something is gone wrong: \n ${snapshot.error}"),
+              );
             }
 
             // By default, show a loading spinner.
