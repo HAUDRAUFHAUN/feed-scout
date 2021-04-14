@@ -6,9 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 class ListItem extends StatelessWidget {
   ListItem(
       {Key key,
-      this.title: "false",
-      this.description: "some description",
-      this.url: "https://duckduckgo.com"})
+      this.title: "feed title",
+      this.description: "feed description",
+      this.url: "feed url"})
       : super(key: key);
 
   final String title;

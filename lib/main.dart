@@ -3,15 +3,19 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webfeed/webfeed.dart';
+import 'package:dart_rss/dart_rss.dart';
 
 import 'components/ListItem.dart';
 
 import 'pages/AddFeed.dart';
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
+  await Hive.openBox('savedFeeds');
   runApp(MyApp());
 }
 
@@ -19,7 +23,17 @@ Future getData(String url) async {
   var res = await http.get(Uri.parse(url));
 
   if (res.statusCode == 200) {
-    var channel = RssFeed.parse(res.body);
+    var channel = null;
+    if (url.contains(".rss")) {
+      channel = RssFeed.parse(res.body);
+    } /*else if (url.contains(".rtf")) {
+      channel = Rss1Feed.parse(res.body);
+    }*/
+    else if (url.contains(".xml")) {
+      channel = AtomFeed.parse(res.body);
+    } else {
+      channel = null;
+    }
     return channel;
   }
 
@@ -52,16 +66,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Future feedData;
 
+  final String feedSource = "https://www.spiegel.de/schlagzeilen/index.rss";
+
   @override
   void initState() {
     super.initState();
-    feedData = getData("https://www.spiegel.de/schlagzeilen/index.rss");
+    feedData = getData(feedSource);
   }
 
   @override
   void refresh() {
     super.setState(() {});
-    feedData = getData("https://www.spiegel.de/schlagzeilen/index.rss");
+    feedData = getData(feedSource);
   }
 
   @override
@@ -106,14 +122,15 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 4),
+        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 1),
         child: FutureBuilder(
           future: feedData,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return ListView(
-                children: <Widget>[
-                  Column(
+              if (feedSource.contains(".xml")) {
+                return ListView(
+                  children: <Widget>[
+                    /*Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Container(
@@ -121,17 +138,41 @@ class _MyHomePageState extends State<MyHomePage> {
                             BoxConstraints(minWidth: 100, maxWidth: 150),
                         padding: EdgeInsets.all(10),
                         child:
-                            Image(image: NetworkImage(snapshot.data.image.url)),
+                            Image(image: NetworkImage(snapshot.data.logo.url)),
                       ),
                     ],
-                  ),
-                  for (var item in snapshot.data.items)
-                    ListItem(
-                        title: item.title,
-                        description: item.description,
-                        url: item.link)
-                ],
-              );
+                  ),*/
+                    for (var item in snapshot.data.items)
+                      ListItem(
+                          title: item.title.toString(),
+                          description: item.content,
+                          url: item.id)
+                  ],
+                );
+              } else if (feedSource.contains(".rss")) {
+                return ListView(
+                  children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          constraints:
+                              BoxConstraints(minWidth: 100, maxWidth: 150),
+                          padding: EdgeInsets.all(10),
+                          child: Image(
+                            image: NetworkImage(snapshot.data.image.url),
+                          ),
+                        ),
+                      ],
+                    ),
+                    for (var item in snapshot.data.items)
+                      ListItem(
+                          title: item.title.toString(),
+                          description: item.description,
+                          url: item.link)
+                  ],
+                );
+              }
             } else if (snapshot.hasError) {
               return Container(
                 padding: EdgeInsets.all(10),
@@ -140,7 +181,9 @@ class _MyHomePageState extends State<MyHomePage> {
             }
 
             // By default, show a loading spinner.
-            return CircularProgressIndicator();
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           },
         ),
       ),
