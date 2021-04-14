@@ -21,20 +21,28 @@ void main() async {
 
 Future getData(String url) async {
   var res = await http.get(Uri.parse(url));
+  var channel = null;
 
   if (res.statusCode == 200) {
-    var channel = null;
-    if (url.contains(".rss")) {
-      channel = RssFeed.parse(res.body);
-    } /*else if (url.contains(".rtf")) {
+    try {
+      if (url.contains("rss")) {
+        channel = RssFeed.parse(res.body);
+      } /*else if (url.contains(".rtf")) {
       channel = Rss1Feed.parse(res.body);
     }*/
-    else if (url.contains(".xml")) {
-      channel = AtomFeed.parse(res.body);
-    } else {
+      else if (url.contains(".xml")) {
+        channel = AtomFeed.parse(res.body);
+      } else {
+        channel = null;
+      }
+      return channel;
+    } catch (error) {
       channel = null;
+      return SnackBar(content: Text("Something bad happened: $error"));
     }
-    return channel;
+  } else if (res.statusCode == 404) {
+    channel = null;
+    return SnackBar(content: Text("404 Feed not found"));
   }
 
   return CircularProgressIndicator();
@@ -66,7 +74,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Future feedData;
 
-  final String feedSource = "https://www.spiegel.de/schlagzeilen/index.rss";
+  final String feedSource = "https://spiegel.de/schlagzeilen/index.rss";
 
   @override
   void initState() {
@@ -130,23 +138,27 @@ class _MyHomePageState extends State<MyHomePage> {
               if (feedSource.contains(".xml")) {
                 return ListView(
                   children: <Widget>[
-                    /*Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        constraints:
-                            BoxConstraints(minWidth: 100, maxWidth: 150),
-                        padding: EdgeInsets.all(10),
-                        child:
-                            Image(image: NetworkImage(snapshot.data.logo.url)),
-                      ),
-                    ],
-                  ),*/
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          constraints:
+                              BoxConstraints(minWidth: 100, maxWidth: 150),
+                          padding: EdgeInsets.all(10),
+                          child: Text(
+                            snapshot.data.title,
+                            style: TextStyle(
+                                fontSize: 21.0, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
                     for (var item in snapshot.data.items)
                       ListItem(
-                          title: item.title.toString(),
-                          description: item.content,
-                          url: item.id)
+                        title: item.title.toString(),
+                        description: item.content,
+                        url: item.id,
+                      )
                   ],
                 );
               } else if (feedSource.contains(".rss")) {
@@ -167,9 +179,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     for (var item in snapshot.data.items)
                       ListItem(
-                          title: item.title.toString(),
-                          description: item.description,
-                          url: item.link)
+                        title: item.title.toString(),
+                        description: item.description,
+                        url: item.link,
+                      )
                   ],
                 );
               }

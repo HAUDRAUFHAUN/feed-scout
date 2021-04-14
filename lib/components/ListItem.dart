@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class ListItem extends StatelessWidget {
   ListItem(
@@ -36,7 +37,10 @@ class ListItem extends StatelessWidget {
               textAlign: TextAlign.start,
               style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
-            Text(description),
+            if (description.contains("<p>"))
+              Html(data: description)
+            else
+              Text(description)
           ],
         ),
       ),
