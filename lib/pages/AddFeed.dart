@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../main.dart';
 
 class AddFeed extends StatefulWidget {
@@ -11,7 +9,7 @@ class AddFeed extends StatefulWidget {
 
 class _AddFeedState extends State<AddFeed> {
   final _formKey = GlobalKey<FormState>();
-
+  final newFeedController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +87,6 @@ class _AddFeedState extends State<AddFeed> {
                         // the form is invalid.
                         if (_formKey.currentState.validate()) {
                           print("validated");
-                          _saveFeed();
                         }
                       },
                       child: Text('Safe feed'),
@@ -111,12 +108,4 @@ class _AddFeedState extends State<AddFeed> {
       ),
     );
   }
-}
-
-_saveFeed() async {
-  final prefs = await SharedPreferences.getInstance();
-  final key = 'my_int_key';
-  final value = 42;
-  prefs.setInt(key, value);
-  print('saved $value');
 }
